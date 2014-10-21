@@ -96,7 +96,7 @@ def validate_signature():
 
 def updateFolder(data):
     if not validate_signature():
-    app.logger.debug("\n \n\n\n Sono Falsoooooooo \n" )
+        app.logger.debug("\n \n\n\n Sono Falsoooooooo \n" )
         return False
 
     wwwDir = '/var/www/'
