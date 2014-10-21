@@ -27,7 +27,7 @@ app.debug = True
 def test():
     print 'branch ' + ' gitDir '
     logging.warning('Watch out!')
-    return 'ciao'
+    return 'It runs'
 
 @app.route('/post-update', methods=['GET','POST'])
 def postUpdate():
@@ -36,10 +36,10 @@ def postUpdate():
         data = request.json
         app.logger.debug(str(data))
         if not updateFolder(data):
-            return "non e corretta la chiave"
-        return ''
+            return "Not correct key "
+        return 'All Right'
     else:
-        return 'ciao'
+        return 'Request must be POST not GET [/post-update]'
 
 @app.route('/post-updateFlask', methods=['GET','POST'])
 def postUpdateFlask():
@@ -60,7 +60,7 @@ def postUpdateFlask():
             app.logger.debug('no requirement.txt found')
         return ''
     else:
-        return 'ciao'
+        return 'Request must be POST not GET [/post-updateFlask]'
 
 @app.route('/post-updateNode', methods=['GET','POST'])
 def postUpdateNode():
@@ -79,7 +79,7 @@ def postUpdateNode():
             app.logger.debug('no package.json found')
         return ''
     else:
-        return 'ciao'
+        return 'Request must be POST not GET [/post-updateNode]'
 
 ############################################################
 
@@ -90,13 +90,13 @@ def validate_signature():
         return False
 
     mac = hmac.new(SECRET_KEY,request.data, sha1)
-    return mac.hexdigest()== signature
+    return mac.hexdigest()== signature                     # not secure evaluation find a solution
 
 ############################################################
 
 def updateFolder(data):
     if not validate_signature():
-        app.logger.debug("\n \n\n\n Sono Falsoooooooo \n" )
+        app.logger.debug("\n Error not validate signature check your key \n" )
         return False
 
     wwwDir = '/var/www/'
