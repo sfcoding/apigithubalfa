@@ -23,13 +23,15 @@ app.logger.addHandler(handler)
 #app.setLevel(logging.DEBUG)
 app.debug = True
 
-pythonPath = {'python-2.7':'/usr/bin/python', 'python-3.4': '/usr/bin/python3'}
+pythonPath = {'python-2.7': '/usr/bin/python', 'python-3.4': '/usr/bin/python3'}
+
 
 @app.route('/')
 def test():
     print 'branch ' + ' gitDir '
     logging.warning('Watch out!')
     return 'It runs'
+
 
 @app.route('/post-update', methods=['GET','POST'])
 def postUpdate():
@@ -43,6 +45,7 @@ def postUpdate():
     else:
         return 'Request must be POST not GET [/post-update]'
 
+
 @app.route('/post-updateFlask', methods=['GET','POST'])
 def postUpdateFlask():
     if request.method == 'POST':
@@ -53,15 +56,17 @@ def postUpdateFlask():
         if updateFolder(data) and os.path.exists(wwwDir+'/requirements.txt') and os.path.exists(wwwDir+'/runtime.txt'):
             venv = wwwDir + '/venv'
             if not os.path.isdir(venv):
-                print 'create virtualenv'
+                app.logger.debug('create virtualenv.. ')
                 pathPy = getPythonPath(wwwDir+'/runtime.txt')
-                if pathPy != None:
-                    ris = subprocess.call(['/usr/local/bin/virtualenv', '-p '+pathPy, venv], stdout=subprocess.PIPE)
+                app.logger.debug('python runtime version.. ' + pathPy)
+                if pathPy is not None:
+                    ris = subprocess.call(['/usr/local/bin/virtualenv', '-p', pathPy, venv], stdout=subprocess.PIPE)
+                    app.logger.debug('create virtual env.. ' + str(ris))
                 else:
                     err = 'wrong python version'
                     app.logger.debug(err)
                     return err
-            ris = subprocess.call([venv+'/bin/pip', 'install', '-r', wwwDir+'/requirements.txt'], stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            ris = subprocess.call([venv+'/bin/pip', 'install', '-r', wwwDir + '/requirements.txt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             ris = subprocess.call(['/usr/bin/touch', wwwDir+'/tmp/restart.txt'], stdout=subprocess.PIPE)
             app.logger.debug('ok '+str(ris))
             return 'ok'
@@ -72,6 +77,7 @@ def postUpdateFlask():
     else:
         return 'Request must be POST not GET [/post-updateFlask]'
 
+
 @app.route('/post-updateNode', methods=['GET','POST'])
 def postUpdateNode():
     if request.method == 'POST':
@@ -81,7 +87,7 @@ def postUpdateNode():
 
         if updateFolder(data) and os.path.exists(wwwDir+'/package.json'):
 
-            ris = subprocess.call(['/usr/bin/npm', 'install', '--prefix', wwwDir], stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+            ris = subprocess.call(['/usr/bin/npm', 'install', '--prefix', wwwDir], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             app.logger.debug('npm istallation '+str(ris))
             ris = subprocess.call(['/usr/bin/touch', wwwDir+'/tmp/restart.txt'], stdout=subprocess.PIPE)
             app.logger.debug('fatto '+str(ris))
@@ -93,16 +99,18 @@ def postUpdateNode():
 
 ############################################################
 
+
 def validate_signature():
     SECRET_KEY = os.environ['WSGI_ENV']
-    sha_name,signature = request.headers.get("X-Hub-Signature").split("=")
+    sha_name, signature = request.headers.get("X-Hub-Signature").split("=")
     if sha_name != 'sha1':
         return False
 
-    mac = hmac.new(SECRET_KEY,request.data, sha1)
-    return mac.hexdigest()== signature                     # not secure evaluation find a solution
+    mac = hmac.new(SECRET_KEY, request.data, sha1)
+    return mac.hexdigest() == signature                     # not secure evaluation find a solution
 
 ############################################################
+
 
 def updateFolder(data):
     if not validate_signature():
@@ -135,7 +143,7 @@ def updateFolder(data):
 
 
 def getPythonPath(runtimeFile):
-    in_file = open(runtimeFile,"r")
+    in_file = open(runtimeFile, 'r')
     text = in_file.readline().strip()
     in_file.close()
 
