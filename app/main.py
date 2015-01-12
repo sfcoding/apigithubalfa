@@ -57,7 +57,7 @@ def postUpdateFlask():
                 pathPy = getPythonPath(wwwDir+'/runtime.txt')
                 if pathPy != None:
                     ris = subprocess.call(['/usr/local/bin/virtualenv', '-p '+pathPy, venv], stdout=subprocess.PIPE)
-                else
+                else:
                     err = 'wrong python version'
                     app.logger.debug(err)
                     return err
@@ -66,7 +66,7 @@ def postUpdateFlask():
             app.logger.debug('ok '+str(ris))
             return 'ok'
         else:
-            err = 'no requirement.txt or runtime.txt found'
+            err = 'no requirements.txt or runtime.txt found'
             app.logger.debug(err)
             return err
     else:
@@ -125,12 +125,12 @@ def updateFolder(data):
         #ris = subprocess.call(['sudo', '-u', 'git', '-H', 'git', '--work-tree='+wwwDir, '--git-dir='+gitDir, 'checkout', '-f'])
         #ris = subprocess.call(['cd', repoDir, '&&', 'git', 'pull'])
         ris = subprocess.call(['git', '--work-tree='+repoDir, '--git-dir='+repoDir+'/.git', 'pull'])
-        app.logger.debug(str(ris))
+        app.logger.debug('git folder found..' + str(ris))
     else:
         sshUrl = data['repository']['ssh_url']
         #ris = subprocess.call(['cd', wwwDir, '&&', 'git', 'clone', sshUrl])
         ris = subprocess.call(['git', 'clone', sshUrl, repoDir])
-        app.logger.debug(str(ris))
+        app.logger.debug('git folder not found..' + str(ris))
     return True
 
 
