@@ -23,6 +23,8 @@ app.logger.addHandler(handler)
 #app.setLevel(logging.DEBUG)
 app.debug = True
 
+pythonPath = {'python-2.7':'/usr/bin/python', 'python-3.4': '/usr/bin/python3'}
+
 @app.route('/')
 def test():
     print 'branch ' + ' gitDir '
@@ -48,17 +50,25 @@ def postUpdateFlask():
         data = request.json
         wwwDir = '/var/www/'+data['repository']['name']
 
-        if updateFolder(data) and os.path.exists(wwwDir+'/requirements.txt'):
+        if updateFolder(data) and os.path.exists(wwwDir+'/requirements.txt') and os.path.exists(wwwDir+'/runtime.txt'):
             venv = wwwDir + '/venv'
             if not os.path.isdir(venv):
                 print 'create virtualenv'
-                ris = subprocess.call(['/usr/local/bin/virtualenv', venv], stdout=subprocess.PIPE)
+                pathPy = getPythonPath(wwwDir+'/runtime.txt')
+                if pathPy != None:
+                    ris = subprocess.call(['/usr/local/bin/virtualenv', '-p '+pathPy, venv], stdout=subprocess.PIPE)
+                else
+                    err = 'wrong python version'
+                    app.logger.debug(err)
+                    return err
             ris = subprocess.call([venv+'/bin/pip', 'install', '-r', wwwDir+'/requirements.txt'], stdout=subprocess.PIPE,stderr=subprocess.PIPE)
             ris = subprocess.call(['/usr/bin/touch', wwwDir+'/tmp/restart.txt'], stdout=subprocess.PIPE)
-            app.logger.debug('fatto '+str(ris))
+            app.logger.debug('ok '+str(ris))
+            return 'ok'
         else:
-            app.logger.debug('no requirement.txt found')
-        return ''
+            err = 'no requirement.txt or runtime.txt found'
+            app.logger.debug(err)
+            return err
     else:
         return 'Request must be POST not GET [/post-updateFlask]'
 
@@ -122,3 +132,11 @@ def updateFolder(data):
         ris = subprocess.call(['git', 'clone', sshUrl, repoDir])
         app.logger.debug(str(ris))
     return True
+
+
+def getPythonPath(runtimeFile):
+    in_file = open(runtimeFile,"r")
+    text = in_file.readline().strip()
+    in_file.close()
+
+    return pythonPath.get(text)
