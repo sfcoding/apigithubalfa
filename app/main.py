@@ -132,6 +132,7 @@ def updateFolder(data):
         #branch = data['ref']
         #ris = subprocess.call(['sudo', '-u', 'git', '-H', 'git', '--work-tree='+wwwDir, '--git-dir='+gitDir, 'checkout', '-f'])
         #ris = subprocess.call(['cd', repoDir, '&&', 'git', 'pull'])
+        ris = subprocess.call(['git', '--work-tree='+repoDir, '--git-dir='+repoDir+'/.git', 'reset', '--hard'])
         ris = subprocess.call(['git', '--work-tree='+repoDir, '--git-dir='+repoDir+'/.git', 'pull'])
         app.logger.debug('git folder found..' + str(ris))
     else:
